@@ -32,11 +32,11 @@ func main() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
-	logrus.Debugln("Flags parsed. Creating session...")
+	logger.Debugln("Flags parsed. Creating session...")
 	s, err := gb.NewSession(roomName, password, logger)
 	if err != nil {
-		logrus.Fatalf("Fatal error: creating session: %s", err)
+		logger.Fatalf("Fatal error: creating session: %s", err)
 	}
-	logrus.Debugln("Session created.")
+	logger.Debugln("Session created.")
 	s.Run()
 }

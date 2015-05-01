@@ -2,29 +2,69 @@ package githubbot
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/phayes/hookserve/hookserve"
+	"github.com/cpalone/gohook"
 )
 
 func (s *Session) hookServer(port int, secret string) {
-	server := hookserve.NewServer()
-	server.Port = port
-	server.Secret = secret
+	server := gohook.NewServer(port, secret, "/postreceive")
 	s.logger.Debug("Starting webhook server...")
 	server.GoListenAndServe()
 	s.logger.Debug("...started.")
 	for {
-		select {
-		case event := <-server.Events:
-			URL := fmt.Sprintf("github.com/%s/%s/commits/%s", event.Owner, event.Repo, event.Commit)
-			s.logger.Debug("Received webhook event of type: %s", event.Type)
-			if event.Type != "push" {
-				continue
+		et := <-server.EventAndTypes
+		s.logger.Infof("Received hook event of type '%s'.", et.Type)
+		switch et.Type {
+		case gohook.PingEventType:
+			continue
+		case gohook.PushEventType:
+			s.logger.Debug("Entering PushEventType case.")
+			payload, ok := et.Event.(*gohook.PushEvent)
+			if !ok {
+				panic("Malformed *PushEvent.")
 			}
-			s.sendMessage(fmt.Sprintf("[%s | %s] Commit pushed. %s", event.Repo, event.Branch, URL), "")
-		case <-time.After(time.Duration(30) * time.Second):
-			s.logger.Debug("Timed out without an event.")
+			msg := fmt.Sprintf("[ %s | %s ] Commit: %s (%s)",
+				payload.Repository.Name,
+				payload.Ref[11:], // this discards "refs/heads/"
+				payload.HeadCommit.Message,
+				payload.HeadCommit.URL,
+			)
+			s.sendMessage(msg, "")
+		case gohook.CommitCommentEventType:
+			payload, ok := et.Event.(*gohook.CommitCommentEvent)
+			if !ok {
+				panic("Malformed *CommitCommentEvent.")
+			}
+			msg := fmt.Sprintf("[ %s ] Comment on commit: %s (%s)",
+				payload.Repository.Name,
+				payload.Comment.Body,
+				payload.Comment.HTMLURL,
+			)
+			s.sendMessage(msg, "")
+		case gohook.IssueCommentEventType:
+			payload, ok := et.Event.(*gohook.IssueCommentEvent)
+			if !ok {
+				panic("Malformed *CommitCommentEvent.")
+			}
+			msg := fmt.Sprintf("[ %s ] Comment on issue '%s': %s (%s)",
+				payload.Repository.Name,
+				payload.Issue.Title,
+				payload.Comment.Body,
+				payload.Comment.HTMLURL,
+			)
+			s.sendMessage(msg, "")
+		case gohook.IssuesEventType:
+			payload, ok := et.Event.(*gohook.IssuesEvent)
+			if !ok {
+				panic("Malformed *IssuesEvent.")
+			}
+			msg := fmt.Sprintf("[ %s ] Issue '%s' was %s. (%s)",
+				payload.Repository.Name,
+				payload.Issue.Title,
+				payload.Action,
+				payload.Issue.HTMLURL,
+			)
+			s.sendMessage(msg, "")
 		}
 	}
 }
