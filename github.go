@@ -30,6 +30,17 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.HeadCommit.URL,
 			)
 			s.sendMessage(msg, "")
+		case gohook.CommitCommentType:
+			payload, ok := et.Event.(*gohook.CommitCommentEvent)
+			if !ok {
+				panic("Malformed *CommitCommentEvent")
+			}
+			msg := fmt.Sprintf("[ %s ] Comment on commit: %s (%s)",
+				payload.Repository.Name,
+				payload.Comment.Body,
+				payload.Comment.HTMLURL,
+			)
+			s.sendMessage(msg, "")
 		}
 	}
 }
