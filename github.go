@@ -75,6 +75,15 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.RefType,
 			)
 			s.sendMessage(msg, "")
+		case gohook.RepositoryEventType:
+			payload, ok := et.Event.(*gohook.RepositoryEvent)
+			if !ok {
+				panic("Malformed *RepositoryEvent.")
+			}
+			msg := fmt.Sprintf("[ %s ] was created. ",
+				payload.Repository.Name,
+			)
+			s.sendMessage(msg, "")
 		}
 	}
 }
