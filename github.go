@@ -65,6 +65,16 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Issue.HTMLURL,
 			)
 			s.sendMessage(msg, "")
+		case gohook.CreateEventType:
+			payload, ok := et.Event.(*gohook.CreateEvent)
+			if !ok {
+				panic("Malformed *CreateEvent.")
+			}
+			msg := fmt.Sprintf("[ %s ] %s created.",
+				payload.Repository.Name,
+				payload.RefType,
+			)
+			s.sendMessage(msg, "")
 		}
 	}
 }
