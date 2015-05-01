@@ -22,3 +22,6 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# OS X Directory Store (history file for GUI settings on Macs)
+.DS_Store
