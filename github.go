@@ -18,6 +18,7 @@ func (s *Session) hookServer(port int, secret string) {
 		case gohook.PingEventType:
 			continue
 		case gohook.PushEventType:
+			s.logger.Debug("Entering PushEventType case.")
 			payload, ok := et.Event.(*gohook.PushEvent)
 			if !ok {
 				panic("Malformed *PushEvent.")
