@@ -13,6 +13,7 @@ func (s *Session) hookServer(port int, secret string) {
 	s.logger.Debug("...started.")
 	for {
 		et := <-server.EventAndTypes
+		s.logger.Infof("Received hook event of type '%s'.", et.Type)
 		switch et.Type {
 		case gohook.PingEventType:
 			continue
