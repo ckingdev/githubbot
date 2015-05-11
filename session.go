@@ -20,6 +20,8 @@ type Session struct {
 	outbound chan *PacketEvent
 	errChan  chan error
 	msgID    int
+	port     int
+	secret   string
 	logger   *logrus.Logger
 }
 
@@ -136,7 +138,7 @@ func (s *Session) outboundHandler() {
 	}
 }
 
-func NewSession(roomName, password string, logger *logrus.Logger) (*Session, error) {
+func NewSession(roomName, password string, port int, secret string, logger *logrus.Logger) (*Session, error) {
 	inbound := make(chan *PacketEvent)
 	outbound := make(chan *PacketEvent)
 	errChan := make(chan error)
@@ -148,6 +150,8 @@ func NewSession(roomName, password string, logger *logrus.Logger) (*Session, err
 		errChan:  errChan,
 		msgID:    0,
 		logger:   logger,
+		port:     port,
+		secret:   secret,
 	}
 	if err := s.connect(); err != nil {
 		return nil, err
@@ -163,6 +167,6 @@ func (s *Session) Run() {
 	go s.inboundHandler()
 	go s.receiver()
 	go s.sendNick()
-	go s.hookServer(8888, "secret")
+	go s.hookServer(s.port, s.secret)
 	<-s.errChan
 }

@@ -11,11 +11,15 @@ import (
 var roomName string
 var password string
 var verbose bool
+var port int
+var secret string
 
 func init() {
 	flag.StringVar(&roomName, "room", "test", "room for the bot to join.")
 	flag.StringVar(&password, "pass", "", "optional password for the bot to join.")
 	flag.BoolVar(&verbose, "v", false, "Toggle whether debug statements are displayed.")
+	flag.IntVar(&port, "port", "8080", "Specify the port to listen on for webhook events.")
+	flag.StringVar(&secret, "secret", "", "Secret string used to encrypt webhook events.")
 }
 
 func main() {
