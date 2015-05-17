@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
@@ -25,7 +26,7 @@ type Session struct {
 	logger   *logrus.Logger
 }
 
-func (s *Session) connect() error {
+func (s *Session) connectOnce() error {
 	s.logger.Debugln("Connecting to euphoria via TLS...")
 	tlsConn, err := tls.Dial("tcp", "euphoria.io:443", &tls.Config{})
 	if err != nil {
@@ -43,11 +44,27 @@ func (s *Session) connect() error {
 	return nil
 }
 
+func (s *Session) connect() error {
+	var err error
+	for i := 0; i < 5; i++ {
+		if err = s.connectOnce(); err == nil {
+			return nil
+		}
+		time.Sleep(time.Duration(i+1) * time.Second * 5)
+	}
+	return err
+}
+
 func (s *Session) receivePacket() error {
 	var packet PacketEvent
 	err := s.conn.ReadJSON(&packet)
 	if err != nil {
-		return err
+		if err := s.connect(); err != nil {
+			return err
+		}
+		if err := s.conn.ReadJSON(&packet); err != nil {
+			return nil
+		}
 	}
 	s.inbound <- &packet
 	return nil
@@ -133,7 +150,12 @@ func (s *Session) outboundHandler() {
 		s.logger.Debugf("Sending packet of type '%s'\n", packet.Type)
 		err := s.conn.WriteJSON(packet)
 		if err != nil {
-			s.logger.Fatalf("Error sending packet: %s\n", err)
+			if err := s.connect(); err != nil {
+				s.logger.Fatalf("Error sending packet: %s\n", err)
+			}
+			if err := s.conn.WriteJSON(packet); err != nil {
+				s.logger.Fatalf("Error sending packet: %s\n", err)
+			}
 		}
 	}
 }
