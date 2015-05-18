@@ -1,7 +1,7 @@
 notify:
   webhook:
     urls:
-      - "http://52.10.123.209:8082/dronehook"
+      - http://52.10.123.209:8082/dronehook
       - on_started: true
       - on_success: true
       - on_failure: true
