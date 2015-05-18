@@ -2,6 +2,6 @@ notify:
   webhook:
     urls:
       - http://172.31.38.240:8082/dronehook
-      - on_started: true
-      - on_success: true
-      - on_failure: true
+    on_started: true
+    on_success: true
+    on_failure: true
