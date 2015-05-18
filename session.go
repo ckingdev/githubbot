@@ -190,6 +190,6 @@ func (s *Session) Run() {
 	go s.receiver()
 	go s.sendNick()
 	go s.hookServer(s.port, s.secret)
-	go s.droneServer(8081)
+	go s.droneServer(8082)
 	<-s.errChan
 }
