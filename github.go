@@ -84,6 +84,30 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Repository.Name,
 			)
 			s.sendMessage(msg, "")
+		case gohook.PullRequestEventType:
+			payload, ok := et.Event.(*gohook.PullRequestEvent)
+			if !ok {
+				panic("Malformed *PullRequestEvent.")
+			}
+			msg := fmt.Sprintf("[ %s | %s ] %s",
+				payload.Repository.Name,
+				payload.PullRequest.Title,
+				payload.Action,
+			)
+			s.sendMessage(msg, "")
+		case gohook.PullRequestReviewCommentEventType:
+			payload, ok := et.Event.(*gohook.PullRequestReviewCommentEvent)
+			if !ok {
+				panic("Malformed *PullRequestReviewCommentEvent.")
+			}
+			msg := fmt.Sprintf("[ %s | %s ] %s: %s",
+				payload.Repository.Name,
+				payload.PullRequest.Title,
+				payload.Sender.Login,
+				payload.Comment.Body,
+			)
+			s.sendMessage(msg, "")
 		}
+
 	}
 }
