@@ -48,7 +48,7 @@ func (s *Session) connect() error {
 	var err error
 	for i := 0; i < 5; i++ {
 		if err = s.connectOnce(); err == nil {
-			s.sendNick()
+			go s.sendNick()
 			return nil
 		} else {
 			s.logger.Infof("Error while connecting: %s\n", err)
