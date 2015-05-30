@@ -50,8 +50,10 @@ func (s *Session) connect() error {
 		if err = s.connectOnce(); err == nil {
 			s.sendNick()
 			return nil
+		} else {
+			s.logger.Infof("Error while connecting: %s\n", err)
+			time.Sleep(time.Duration(i+1) * time.Second * 5)
 		}
-		time.Sleep(time.Duration(i+1) * time.Second * 5)
 	}
 	return err
 }
