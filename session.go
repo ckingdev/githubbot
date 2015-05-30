@@ -48,6 +48,7 @@ func (s *Session) connect() error {
 	var err error
 	for i := 0; i < 5; i++ {
 		if err = s.connectOnce(); err == nil {
+			s.sendNick()
 			return nil
 		}
 		time.Sleep(time.Duration(i+1) * time.Second * 5)
