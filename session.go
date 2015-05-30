@@ -135,7 +135,7 @@ func (s *Session) handlePing(p *PacketEvent) {
 func (s *Session) inboundHandler() {
 	for {
 		packet := <-s.inbound
-		s.logger.Debugf("Receiving packet of type '%s'\n", packet.Type)
+		s.logger.Infof("Receiving packet of type '%s'\n", packet.Type)
 		switch packet.Type {
 		case PingEventType:
 			s.handlePing(packet)
@@ -148,7 +148,7 @@ func (s *Session) inboundHandler() {
 func (s *Session) outboundHandler() {
 	for {
 		packet := <-s.outbound
-		s.logger.Debugf("Sending packet of type '%s'\n", packet.Type)
+		s.logger.Infof("Sending packet of type '%s'\n", packet.Type)
 		err := s.conn.WriteJSON(packet)
 		if err != nil {
 			if err := s.connect(); err != nil {
