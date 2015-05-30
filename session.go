@@ -96,7 +96,7 @@ func (s *Session) sendPayload(payload interface{}, pType PacketType) {
 }
 
 func (s *Session) sendAuth() {
-	s.logger.Debugln("Sending auth.")
+	s.logger.Infoln("Sending auth.")
 	payload := AuthCommand{
 		Type:     "passcode",
 		Passcode: s.password}
@@ -104,13 +104,13 @@ func (s *Session) sendAuth() {
 }
 
 func (s *Session) sendNick() {
-	s.logger.Debugln("Sending nick.")
+	s.logger.Infoln("Sending nick.")
 	payload := NickCommand{Name: "GithubBot"}
 	s.sendPayload(payload, NickType)
 }
 
 func (s *Session) sendMessage(text string, parent string) {
-	s.logger.Debugf("Sending text message: '%s'", text)
+	s.logger.Infof("Sending text message: '%s'", text)
 	payload := SendCommand{
 		Content: text,
 		Parent:  parent,

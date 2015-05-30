@@ -8,9 +8,9 @@ import (
 
 func (s *Session) hookServer(port int, secret string) {
 	server := gohook.NewServer(port, secret, "/postreceive")
-	s.logger.Debug("Starting webhook server...")
+	s.logger.Info("Starting webhook server...")
 	server.GoListenAndServe()
-	s.logger.Debug("...started.")
+	s.logger.Info("...started.")
 	for {
 		et := <-server.EventAndTypes
 		s.logger.Infof("Received hook event of type '%s'.", et.Type)
@@ -18,7 +18,7 @@ func (s *Session) hookServer(port int, secret string) {
 		case gohook.PingEventType:
 			continue
 		case gohook.PushEventType:
-			s.logger.Debug("Entering PushEventType case.")
+			s.logger.Info("Entering PushEventType case.")
 			payload, ok := et.Event.(*gohook.PushEvent)
 			if !ok {
 				panic("Malformed *PushEvent.")
