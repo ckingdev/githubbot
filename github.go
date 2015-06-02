@@ -17,19 +17,6 @@ func (s *Session) hookServer(port int, secret string) {
 		switch et.Type {
 		case gohook.PingEventType:
 			continue
-		case gohook.PushEventType:
-			s.logger.Info("Entering PushEventType case.")
-			payload, ok := et.Event.(*gohook.PushEvent)
-			if !ok {
-				panic("Malformed *PushEvent.")
-			}
-			msg := fmt.Sprintf("[ %s | Branch %s ] Commit: %s (%s)",
-				payload.Repository.Name,
-				payload.Ref[11:], // this discards "refs/heads/"
-				payload.HeadCommit.Message,
-				payload.HeadCommit.URL,
-			)
-			s.sendMessage(msg, "")
 		case gohook.CommitCommentEventType:
 			payload, ok := et.Event.(*gohook.CommitCommentEvent)
 			if !ok {
@@ -40,6 +27,28 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Repository.Name,
 				payload.Comment.Body,
 				payload.Comment.HTMLURL,
+			)
+			s.sendMessage(msg, "")
+		case gohook.CreateEventType:
+			payload, ok := et.Event.(*gohook.CreateEvent)
+			if !ok {
+				panic("Malformed *CreateEvent.")
+			}
+			// TODO: Figure out what to do here
+			msg := fmt.Sprintf("[ %s ] %s created.",
+				payload.Repository.Name,
+				payload.RefType,
+			)
+			s.sendMessage(msg, "")
+		case gohook.DeleteEventType:
+			payload, ok := et.Event.(*gohook.DeleteEvent)
+			if !ok {
+				panic("Malformed *DeleteEvent.")
+			}
+			// TODO: Figure out what to do here
+			msg := fmt.Sprintf("[ %s ] %s deleted.",
+				payload.Repository,
+				payload.RefType,
 			)
 			s.sendMessage(msg, "")
 		case gohook.IssueCommentEventType:
@@ -66,26 +75,6 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Issue.HTMLURL,
 			)
 			s.sendMessage(msg, "")
-		case gohook.CreateEventType:
-			payload, ok := et.Event.(*gohook.CreateEvent)
-			if !ok {
-				panic("Malformed *CreateEvent.")
-			}
-			// TODO: Figure out what to do here
-			msg := fmt.Sprintf("[ %s ] %s created.",
-				payload.Repository.Name,
-				payload.RefType,
-			)
-			s.sendMessage(msg, "")
-		case gohook.RepositoryEventType:
-			payload, ok := et.Event.(*gohook.RepositoryEvent)
-			if !ok {
-				panic("Malformed *RepositoryEvent.")
-			}
-			msg := fmt.Sprintf("[ Repository %s ] Action: created. ",
-				payload.Repository.Name,
-			)
-			s.sendMessage(msg, "")
 		case gohook.PullRequestEventType:
 			payload, ok := et.Event.(*gohook.PullRequestEvent)
 			if !ok {
@@ -107,6 +96,28 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.PullRequest.Title,
 				payload.Sender.Login,
 				payload.Comment.Body,
+			)
+			s.sendMessage(msg, "")
+		case gohook.PushEventType:
+			s.logger.Info("Entering PushEventType case.")
+			payload, ok := et.Event.(*gohook.PushEvent)
+			if !ok {
+				panic("Malformed *PushEvent.")
+			}
+			msg := fmt.Sprintf("[ %s | Branch %s ] Commit: %s (%s)",
+				payload.Repository.Name,
+				payload.Ref[11:], // this discards "refs/heads/"
+				payload.HeadCommit.Message,
+				payload.HeadCommit.URL,
+			)
+			s.sendMessage(msg, "")
+		case gohook.RepositoryEventType:
+			payload, ok := et.Event.(*gohook.RepositoryEvent)
+			if !ok {
+				panic("Malformed *RepositoryEvent.")
+			}
+			msg := fmt.Sprintf("[ Repository %s ] Action: created. ",
+				payload.Repository.Name,
 			)
 			s.sendMessage(msg, "")
 		}
