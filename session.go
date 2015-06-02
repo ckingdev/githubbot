@@ -217,6 +217,6 @@ func (s *Session) Run() {
 	go s.sendNick()
 	go s.hookServer(s.port, s.secret)
 	// go s.droneServer(8082)
-	// go s.travisServer(8085)
+	go s.travisServer(8085)
 	<-s.errChan
 }

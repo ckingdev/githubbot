@@ -2,10 +2,13 @@ language: go
 
 go:
   - 1.4
-  
+
 install:
   - go get github.com/cpalone/dronehook
   - go get github.com/cpalone/travishook
   - go get github.com/cpalone/gohook
   - go get github.com/Sirupsen/logrus
   - go get github.com/gorilla/websocket
+
+notifications:
+  webhooks: http://52.10.123.209:8085/travishook
