@@ -49,6 +49,8 @@ type SendCommand struct {
 	Parent  string `json:"parent"`
 }
 
+type SendEvent SendCommand
+
 type NickCommand struct {
 	Name string `json:"name"`
 }
@@ -69,6 +71,8 @@ func (p *PacketEvent) Payload() (interface{}, error) {
 		payload = &PingReply{}
 	case AuthType:
 		payload = &AuthCommand{}
+	case SendEventType:
+		payload = &SendEvent{}
 	default:
 		return p.Data, fmt.Errorf("Unexpected packet type: %s", p.Type)
 	}

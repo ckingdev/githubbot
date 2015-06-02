@@ -24,6 +24,7 @@ type Session struct {
 	port     int
 	secret   string
 	logger   *logrus.Logger
+	uptime   time.Time
 }
 
 func (s *Session) connectOnce() error {
@@ -134,6 +135,25 @@ func (s *Session) handlePing(p *PacketEvent) {
 	s.sendPayload(out, PingReplyType)
 }
 
+func (s *Session) handleSend(p *PacketEvent) {
+	s.logger.Debugln("Handling send-event.")
+	data, err := p.Payload()
+	if err != nil {
+		panic(err)
+	}
+	payload, ok := data.(*SendEvent)
+	if !ok {
+		logrus.Fatalln("Cannot assert *SendEvent as such.")
+	}
+	if payload.Content == "!uptime" {
+		since := time.Since(s.uptime)
+		s.sendMessage(fmt.Sprintf(
+			"This bot has been up for %s.",
+			since.String()),
+			p.ID)
+	}
+}
+
 func (s *Session) inboundHandler() {
 	for {
 		packet := <-s.inbound
@@ -141,6 +161,8 @@ func (s *Session) inboundHandler() {
 		switch packet.Type {
 		case PingEventType:
 			s.handlePing(packet)
+		case SendEventType:
+			s.handleSend(packet)
 		default:
 			s.logger.Infof("Unhandled packet type '%s'", packet.Type)
 		}
@@ -177,6 +199,7 @@ func NewSession(roomName, password string, port int, secret string, logger *logr
 		logger:   logger,
 		port:     port,
 		secret:   secret,
+		uptime:   time.Now(),
 	}
 	if err := s.connect(); err != nil {
 		return nil, err

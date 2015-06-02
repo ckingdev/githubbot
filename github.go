@@ -34,8 +34,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *CreateEvent.")
 			}
-			// TODO: Figure out what to do here
-			msg := fmt.Sprintf("[ %s ] %s created.",
+			msg := fmt.Sprintf("[ %s | Branch/Tag: %s] Created.",
 				payload.Repository.Name,
 				payload.RefType,
 			)
@@ -45,8 +44,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *DeleteEvent.")
 			}
-			// TODO: Figure out what to do here
-			msg := fmt.Sprintf("[ %s ] %s deleted.",
+			msg := fmt.Sprintf("[ %s | Branch/Tag: %s] Deleted.",
 				payload.Repository,
 				payload.RefType,
 			)
@@ -56,7 +54,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *CommitCommentEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | Issue %s ] Comment: %s (%s)",
+			msg := fmt.Sprintf("[ %s | Issue: %s ] Comment: %s (%s)",
 				payload.Repository.Name,
 				payload.Issue.Title,
 				payload.Comment.Body,
@@ -68,7 +66,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *IssuesEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | Issue %s ] Action: %s. (%s)",
+			msg := fmt.Sprintf("[ %s | Issue: %s ] Action: %s. (%s)",
 				payload.Repository.Name,
 				payload.Issue.Title,
 				payload.Action,
@@ -80,7 +78,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *PullRequestEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | %s ] %s",
+			msg := fmt.Sprintf("[ %s | PR: %s ] %s",
 				payload.Repository.Name,
 				payload.PullRequest.Title,
 				payload.Action,
@@ -91,7 +89,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *PullRequestReviewCommentEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | Pull Request %s ] Comment: %s: %s",
+			msg := fmt.Sprintf("[ %s | PR: %s ] Comment: %s: %s",
 				payload.Repository.Name,
 				payload.PullRequest.Title,
 				payload.Sender.Login,
@@ -104,7 +102,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *PushEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | Branch %s ] Commit: %s (%s)",
+			msg := fmt.Sprintf("[ %s | Branch: %s ] Commit: %s (%s)",
 				payload.Repository.Name,
 				payload.Ref[11:], // this discards "refs/heads/"
 				payload.HeadCommit.Message,
@@ -116,7 +114,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *RepositoryEvent.")
 			}
-			msg := fmt.Sprintf("[ Repository %s ] Action: created. ",
+			msg := fmt.Sprintf("[ Repository: %s ] Action: created. ",
 				payload.Repository.Name,
 			)
 			s.sendMessage(msg, "")
