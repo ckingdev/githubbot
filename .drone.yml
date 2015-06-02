@@ -1,9 +1,4 @@
 image: go1.3
-git:
-  path: github.com/cpalone/githubbot
-env:
-  - GOROOT=/usr/local/go
-  - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 script:
   - go get
   - go build
