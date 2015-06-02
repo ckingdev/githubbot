@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	gb "github.com/fireside-chat/githubbot"
+	gb "github.com/cpalone/githubbot"
 )
 
 var roomName string
