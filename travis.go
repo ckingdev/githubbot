@@ -11,9 +11,9 @@ func (s *Session) travisServer(port int) {
 	server.GoListenAndServe()
 	for {
 		p := <-server.Out
-		fmt.Printf("Received payload with status: %s\n", p.Status)
+		fmt.Printf("Received payload with status: %s\n", p.StatusMessage)
 		s.sendMessage(fmt.Sprintf(
 			"[travis | %s | %s ] Status: %s",
-			p.Repository.Name, p.Branch, p.Status), "")
+			p.Repository.Name, p.Branch, p.StatusMessage), "")
 	}
 }
