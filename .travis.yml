@@ -10,5 +10,7 @@ install:
   - go get github.com/Sirupsen/logrus
   - go get github.com/gorilla/websocket
 
+script: go test ./...
+
 notifications:
   webhooks: http://52.10.123.209:8085/travishook
