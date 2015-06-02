@@ -13,7 +13,7 @@ func (s *Session) travisServer(port int) {
 		p := <-server.Out
 		fmt.Printf("Received payload with status: %s\n", p.StatusMessage)
 		s.sendMessage(fmt.Sprintf(
-			"[travis | %s | %s ] Status: %s",
-			p.Repository.Name, p.Branch, p.StatusMessage), "")
+			"[travis | %s | %s ] Commit '%s' - Status '%s.'",
+			p.Repository.Name, p.Branch,p.Com p.StatusMessage), "")
 	}
 }
