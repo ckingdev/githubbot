@@ -14,6 +14,6 @@ func (s *Session) travisServer(port int) {
 		fmt.Printf("Received payload with status: %s\n", p.StatusMessage)
 		s.sendMessage(fmt.Sprintf(
 			"[travis | %s | %s ] Commit '%s' - Status '%s.'",
-			p.Repository.Name, p.Branch,p.Com p.StatusMessage), "")
+			p.Repository.Name, p.Branch, p.Commit, p.StatusMessage), "")
 	}
 }
