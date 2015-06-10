@@ -15,7 +15,7 @@ func (s *Session) droneServer(port int) {
 		if p.Commit.Status == "Success" {
 			emoji = ":white_check_mark:"
 		} else {
-			emoji = ":x:"
+			emoji = ":no_entry:"
 		}
 		str := fmt.Sprintf("%s [ drone.io | Branch: %s | %s ] %s | %s",
 			emoji,
