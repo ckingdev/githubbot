@@ -11,9 +11,16 @@ func (s *Session) travisServer(port int) {
 	server.GoListenAndServe()
 	for {
 		p := <-server.Out
+		var emoji string
+		if p.StatusMessage == "Passed" || p.StatusMessage == "Fixed" {
+			emoji = ":white_check_mark:"
+		} else {
+			emoji = ":no_entry:"
+		}
+
 		fmt.Printf("Received payload with status: %s\n", p.StatusMessage)
 		s.sendMessage(fmt.Sprintf(
-			"[travis | %s | %s ] Commit '%s' - Status '%s.'",
-			p.Repository.Name, p.Branch, p.Commit, p.StatusMessage), "")
+			"%s [ travis.ci | Branch: %s | %s ] %s | %s.",
+			emoji, p.Repository.Name, p.Branch, p.Message, p.StatusMessage), "")
 	}
 }

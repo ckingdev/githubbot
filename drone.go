@@ -15,7 +15,7 @@ func (s *Session) droneServer(port int) {
 		} else {
 			emoji = ":x:"
 		}
-		str := fmt.Sprintf("%s [ drone.io | %s | %s ] %s | %s",
+		str := fmt.Sprintf("%s [ drone.io | Branch: %s | %s ] %s | %s",
 			emoji,
 			p.Repository.Name,
 			p.Commit.Branch,
