@@ -9,6 +9,19 @@ func (s *Session) droneServer(port int) {
 	server.GoListenAndServe()
 	for {
 		p := <-server.Out
-		s.sendMessage(p.String(), "")
+		var emoji string
+		if p.Commit.Status == "Success" {
+			emoji = ":white_check_mark:"
+		} else {
+			emoji = ":x:"
+		}
+		str := fmt.Sprintf("%s [ drone.io | %s | %s ] %s | %s",
+			emoji,
+			p.Repository.Name,
+			p.Commit.Branch,
+			p.Commit.Message,
+			p.Commit.Status,
+		)
+		s.sendMessage(str, "")
 	}
 }
