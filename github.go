@@ -102,7 +102,7 @@ func (s *Session) hookServer(port int, secret string) {
 			if !ok {
 				panic("Malformed *PushEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | Branch: %s ] Commit: %s (%s)",
+			msg := fmt.Sprintf(":repeat: [ %s | Branch: %s ] Commit: %s (%s)",
 				payload.Repository.Name,
 				payload.Ref[11:], // this discards "refs/heads/"
 				payload.HeadCommit.Message,
