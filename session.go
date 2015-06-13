@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -14,17 +15,18 @@ import (
 )
 
 type Session struct {
-	RoomName string
-	password string
-	conn     *websocket.Conn
-	inbound  chan *PacketEvent
-	outbound chan *PacketEvent
-	errChan  chan error
-	msgID    int
-	port     int
-	secret   string
-	logger   *logrus.Logger
-	uptime   time.Time
+	RoomName    string
+	password    string
+	conn        *websocket.Conn
+	inbound     chan *PacketEvent
+	outbound    chan *PacketEvent
+	errChan     chan error
+	msgID       int
+	port        int
+	secret      string
+	logger      *logrus.Logger
+	uptime      time.Time
+	commitMsgID string
 }
 
 func (s *Session) connectOnce() error {
@@ -154,6 +156,21 @@ func (s *Session) handleSend(p *PacketEvent) {
 	}
 }
 
+func (s *Session) handleSendReply(p *PacketEvent) {
+	s.logger.Debugln("Handling send-reply...")
+	data, err := p.Payload()
+	if err != nil {
+		panic(err)
+	}
+	payload, ok := data.(*SendReply)
+	if !ok {
+		s.logger.Fatalln("Cannot assert *SendReplyType as such.")
+	}
+	if strings.HasPrefix(payload.Content, ":repeat:") {
+		s.commitMsgID = payload.ID
+	}
+}
+
 func (s *Session) inboundHandler() {
 	for {
 		packet := <-s.inbound
@@ -163,6 +180,8 @@ func (s *Session) inboundHandler() {
 			s.handlePing(packet)
 		case SendEventType:
 			s.handleSend(packet)
+		case SendReplyType:
+			s.handleSendReply(packet)
 		default:
 			s.logger.Infof("Unhandled packet type '%s'", packet.Type)
 		}

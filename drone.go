@@ -24,6 +24,6 @@ func (s *Session) droneServer(port int) {
 			p.Commit.Message,
 			p.Commit.Status,
 		)
-		s.sendMessage(str, "")
+		s.sendMessage(str, s.commitMsgID)
 	}
 }

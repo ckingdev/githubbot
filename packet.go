@@ -49,7 +49,20 @@ type SendCommand struct {
 	Parent  string `json:"parent"`
 }
 
-type SendEvent SendCommand
+type Message struct {
+	ID              string `json:"id"`
+	Parent          string `json:"parent"`
+	PreviousEditID  string `json:"previous_edit_id,omitempty"`
+	UnixTime        int64  `json:"time"`
+	Sender          string `json:"sender"`
+	Content         string `json:"content"`
+	EncryptionKeyID string `json:"encryption_key_id,omitempty"`
+	Edited          int64  `json:"edited,omitempty"`
+	Deleted         int64  `json:"deleted,omitempty"`
+}
+
+type SendEvent Message
+type SendReply Message
 
 type NickCommand struct {
 	Name string `json:"name"`
@@ -73,6 +86,8 @@ func (p *PacketEvent) Payload() (interface{}, error) {
 		payload = &AuthCommand{}
 	case SendEventType:
 		payload = &SendEvent{}
+	case SendReplyType:
+		payload = &SendReply{}
 	default:
 		return p.Data, fmt.Errorf("Unexpected packet type: %s", p.Type)
 	}
