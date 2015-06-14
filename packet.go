@@ -49,7 +49,7 @@ type SendCommand struct {
 	Parent  string `json:"parent"`
 }
 
-]type Message struct {
+type Message struct {
 	ID              string `json:"id"`
 	Parent          string `json:"parent"`
 	PreviousEditID  string `json:"previous_edit_id,omitempty"`

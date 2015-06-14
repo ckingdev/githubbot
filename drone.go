@@ -2,6 +2,7 @@ package githubbot
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cpalone/dronehook"
 )
@@ -24,6 +25,7 @@ func (s *Session) droneServer(port int) {
 			p.Commit.Message,
 			p.Commit.Status,
 		)
-		s.sendMessage(str, s.commitMsgID)
+		s.sendMessage(str, s.commitMsgID, strconv.Itoa(s.msgID))
+		s.msgID++
 	}
 }

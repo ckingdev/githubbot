@@ -85,13 +85,13 @@ func (s *Session) receiver() {
 	}
 }
 
-func (s *Session) sendPayload(payload interface{}, pType PacketType) {
+func (s *Session) sendPayload(payload interface{}, pType PacketType, packetID string) {
 	rawPayload, err := json.Marshal(payload)
 	if err != nil {
 		s.logger.Fatalf("Could not marshal payload: %s\n", err)
 	}
 	packet := &PacketEvent{
-		ID:   strconv.Itoa(s.msgID),
+		ID:   packetID,
 		Type: pType,
 	}
 	if err := packet.Data.UnmarshalJSON(rawPayload); err != nil {
@@ -105,22 +105,24 @@ func (s *Session) sendAuth() {
 	payload := AuthCommand{
 		Type:     "passcode",
 		Passcode: s.password}
-	s.sendPayload(payload, AuthType)
+	s.sendPayload(payload, AuthType, strconv.Itoa(s.msgID))
+	s.msgID++
 }
 
 func (s *Session) sendNick() {
 	s.logger.Infoln("Sending nick.")
 	payload := NickCommand{Name: "GithubBot"}
-	s.sendPayload(payload, NickType)
+	s.sendPayload(payload, NickType, strconv.Itoa(s.msgID))
+	s.msgID++
 }
 
-func (s *Session) sendMessage(text string, parent string) {
+func (s *Session) sendMessage(text string, parent string, packetID string) {
 	s.logger.Infof("Sending text message: '%s'", text)
 	payload := SendCommand{
 		Content: text,
 		Parent:  parent,
 	}
-	s.sendPayload(payload, SendType)
+	s.sendPayload(payload, SendType, packetID)
 }
 
 func (s *Session) handlePing(p *PacketEvent) {
@@ -134,7 +136,8 @@ func (s *Session) handlePing(p *PacketEvent) {
 		logrus.Fatalln("Cannot assert *PingEvent as such.")
 	}
 	out := PingReply{UnixTime: payload.Time}
-	s.sendPayload(out, PingReplyType)
+	s.sendPayload(out, PingReplyType, strconv.Itoa(s.msgID))
+	s.msgID++
 }
 
 func (s *Session) handleSend(p *PacketEvent) {
@@ -152,7 +155,8 @@ func (s *Session) handleSend(p *PacketEvent) {
 		s.sendMessage(fmt.Sprintf(
 			"This bot has been up for %s.",
 			since.String()),
-			p.ID)
+			p.ID, strconv.Itoa(s.msgID))
+		s.msgID++
 	}
 }
 

@@ -2,6 +2,8 @@ package githubbot
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/cpalone/gohook"
 )
@@ -28,7 +30,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Comment.Body,
 				payload.Comment.HTMLURL,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.CreateEventType:
 			payload, ok := et.Event.(*gohook.CreateEvent)
 			if !ok {
@@ -38,7 +41,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Repository.Name,
 				payload.RefType,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.DeleteEventType:
 			payload, ok := et.Event.(*gohook.DeleteEvent)
 			if !ok {
@@ -48,7 +52,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Repository,
 				payload.RefType,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.IssueCommentEventType:
 			payload, ok := et.Event.(*gohook.IssueCommentEvent)
 			if !ok {
@@ -60,7 +65,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Comment.Body,
 				payload.Comment.HTMLURL,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.IssuesEventType:
 			payload, ok := et.Event.(*gohook.IssuesEvent)
 			if !ok {
@@ -72,7 +78,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Action,
 				payload.Issue.HTMLURL,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.PullRequestEventType:
 			payload, ok := et.Event.(*gohook.PullRequestEvent)
 			if !ok {
@@ -83,7 +90,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.PullRequest.Title,
 				payload.Action,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.PullRequestReviewCommentEventType:
 			payload, ok := et.Event.(*gohook.PullRequestReviewCommentEvent)
 			if !ok {
@@ -95,7 +103,18 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.Sender.Login,
 				payload.Comment.Body,
 			)
-			s.sendMessage(msg, "")
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
+		case gohook.RepositoryEventType:
+			payload, ok := et.Event.(*gohook.RepositoryEvent)
+			if !ok {
+				panic("Malformed *RepositoryEvent.")
+			}
+			msg := fmt.Sprintf("[ Repository: %s ] Action: created. ",
+				payload.Repository.Name,
+			)
+			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
+			s.msgID++
 		case gohook.PushEventType:
 			s.logger.Info("Entering PushEventType case.")
 			payload, ok := et.Event.(*gohook.PushEvent)
@@ -108,16 +127,8 @@ func (s *Session) hookServer(port int, secret string) {
 				payload.HeadCommit.Message,
 				payload.HeadCommit.URL,
 			)
-			s.sendMessage(msg, "")
-		case gohook.RepositoryEventType:
-			payload, ok := et.Event.(*gohook.RepositoryEvent)
-			if !ok {
-				panic("Malformed *RepositoryEvent.")
-			}
-			msg := fmt.Sprintf("[ Repository: %s ] Action: created. ",
-				payload.Repository.Name,
-			)
-			s.sendMessage(msg, "")
+			t := strconv.Itoa(int(time.Now().Unix()))
+			s.sendMessage(msg, "", t)
 		}
 
 	}

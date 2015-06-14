@@ -2,6 +2,7 @@ package githubbot
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cpalone/travishook"
 )
@@ -21,6 +22,9 @@ func (s *Session) travisServer(port int) {
 		fmt.Printf("Received payload with status: %s\n", p.StatusMessage)
 		s.sendMessage(fmt.Sprintf(
 			"%s [ travis.ci | Branch: %s | %s ] %s | %s.",
-			emoji, p.Repository.Name, p.Branch, p.Message, p.StatusMessage), s.commitMsgID)
+			emoji, p.Repository.Name, p.Branch, p.Message, p.StatusMessage),
+			s.commitMsgID,
+			strconv.Itoa(s.msgID))
+		s.msgID++
 	}
 }
