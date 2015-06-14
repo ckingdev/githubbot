@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -27,6 +26,7 @@ type Session struct {
 	logger      *logrus.Logger
 	uptime      time.Time
 	commitMsgID string
+	waiting     bool
 }
 
 func (s *Session) connectOnce() error {
@@ -160,22 +160,7 @@ func (s *Session) handleSend(p *PacketEvent) {
 	}
 }
 
-func (s *Session) handleSendReply(p *PacketEvent) {
-	s.logger.Debugln("Handling send-reply...")
-	data, err := p.Payload()
-	if err != nil {
-		panic(err)
-	}
-	payload, ok := data.(*SendReply)
-	if !ok {
-		s.logger.Fatalln("Cannot assert *SendReplyType as such.")
-	}
-	if strings.HasPrefix(payload.Content, ":repeat:") {
-		s.commitMsgID = payload.ID
-	}
-}
-
-func (s *Session) inboundHandler() {
+func (s *Session) inboundHandler(sendReplyChan chan PacketEvent) {
 	for {
 		packet := <-s.inbound
 		s.logger.Infof("Receiving packet of type '%s'\n", packet.Type)
@@ -185,7 +170,10 @@ func (s *Session) inboundHandler() {
 		case SendEventType:
 			s.handleSend(packet)
 		case SendReplyType:
-			s.handleSendReply(packet)
+			if !s.waiting {
+				continue
+			}
+			sendReplyChan <- *packet
 		default:
 			s.logger.Infof("Unhandled packet type '%s'", packet.Type)
 		}
@@ -234,12 +222,11 @@ func (s *Session) Run() {
 	if s.password != "" {
 		go s.sendAuth()
 	}
+	sendReplyChan := make(chan PacketEvent)
 	go s.outboundHandler()
-	go s.inboundHandler()
+	go s.inboundHandler(sendReplyChan)
 	go s.receiver()
 	go s.sendNick()
-	go s.hookServer(s.port, s.secret)
-	go s.droneServer(8082)
-	go s.travisServer(8085)
+	go s.hookServer(s.port, s.secret, sendReplyChan)
 	<-s.errChan
 }
