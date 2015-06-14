@@ -12,5 +12,5 @@ install:
 
 script: go test ./...
 
-# notifications:
-#   webhooks: http://52.10.123.209:8085/travishook
+notifications:
+  webhooks: http://52.10.123.209:8085/travishook
