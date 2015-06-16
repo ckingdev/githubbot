@@ -14,19 +14,19 @@ import (
 )
 
 type Session struct {
-	RoomName    string
-	password    string
-	conn        *websocket.Conn
-	inbound     chan *PacketEvent
-	outbound    chan *PacketEvent
-	errChan     chan error
-	msgID       int
-	port        int
-	secret      string
-	logger      *logrus.Logger
-	uptime      time.Time
-	commitMsgID string
-	waiting     bool
+	RoomName     string
+	password     string
+	conn         *websocket.Conn
+	inbound      chan *PacketEvent
+	outbound     chan *PacketEvent
+	errChan      chan error
+	msgID        int
+	port         int
+	secret       string
+	logger       *logrus.Logger
+	uptime       time.Time
+	waiting      bool
+	commitParent map[string]string
 }
 
 func (s *Session) connectOnce() error {
@@ -201,16 +201,17 @@ func NewSession(roomName, password string, port int, secret string, logger *logr
 	outbound := make(chan *PacketEvent)
 	errChan := make(chan error)
 	s := Session{
-		RoomName: roomName,
-		password: password,
-		inbound:  inbound,
-		outbound: outbound,
-		errChan:  errChan,
-		msgID:    0,
-		logger:   logger,
-		port:     port,
-		secret:   secret,
-		uptime:   time.Now(),
+		RoomName:     roomName,
+		password:     password,
+		inbound:      inbound,
+		outbound:     outbound,
+		errChan:      errChan,
+		msgID:        0,
+		logger:       logger,
+		port:         port,
+		secret:       secret,
+		uptime:       time.Now(),
+		commitParent: make(map[string]string),
 	}
 	if err := s.connect(); err != nil {
 		return nil, err
@@ -219,6 +220,7 @@ func NewSession(roomName, password string, port int, secret string, logger *logr
 }
 
 func (s *Session) Run() {
+
 	if s.password != "" {
 		go s.sendAuth()
 	}
@@ -228,5 +230,7 @@ func (s *Session) Run() {
 	go s.receiver()
 	go s.sendNick()
 	go s.hookServer(s.port, s.secret, sendReplyChan)
-	<-s.errChan
+	go s.ciHandler()
+	err := <-s.errChan
+	s.logger.Fatalln("Session.Run: %s", err)
 }

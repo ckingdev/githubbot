@@ -5,9 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cpalone/dronehook"
 	"github.com/cpalone/gohook"
-	"github.com/cpalone/travishook"
 )
 
 func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketEvent) {
@@ -15,16 +13,6 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 	gServer := gohook.NewServer(port, secret, "/postreceive")
 	s.logger.Info("Starting github server...")
 	gServer.GoListenAndServe()
-
-	// spin off travis server
-	tServer := travishook.NewServer(8085, "/travishook")
-	s.logger.Info("Starting travis server...")
-	tServer.GoListenAndServe()
-
-	//spin off drone server
-	dServer := dronehook.NewServer(8082, "/dronehook")
-	s.logger.Info("Starting drone server...")
-	dServer.GoListenAndServe()
 
 	// Wait for github hook event
 	for {
@@ -161,55 +149,7 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			if !ok {
 				s.logger.Fatalln("Could not assert *SendReply as such.")
 			}
-
-			// wait for travis build message
-			go func() {
-				select {
-				case p := <-tServer.Out:
-					var emoji string
-					if p.StatusMessage == "Passed" || p.StatusMessage == "Fixed" {
-						emoji = ":white_check_mark:"
-					} else {
-						emoji = ":no_entry:"
-					}
-					s.sendMessage(fmt.Sprintf(
-						"%s [ travis.ci | Branch: %s | %s ] %s | %s.",
-						emoji, p.Repository.Name, p.Branch, p.Message, p.StatusMessage),
-						data.ID, strconv.Itoa(s.msgID))
-					s.msgID++
-				case <-time.After(time.Duration(10) * time.Minute):
-					s.sendMessage("Timed out waiting for build status from travis.",
-						data.ID, strconv.Itoa(s.msgID))
-					s.msgID++
-				}
-			}()
-
-			// wait for drone build message
-			go func() {
-				select {
-				case p := <-dServer.Out:
-					var emoji string
-					if p.Commit.Status == "Success" {
-						emoji = ":white_check_mark:"
-					} else {
-						emoji = ":no_entry:"
-					}
-					str := fmt.Sprintf("%s [ drone.io | Branch: %s | %s ] %s | %s",
-						emoji,
-						p.Repository.Name,
-						p.Commit.Branch,
-						p.Commit.Message,
-						p.Commit.Status,
-					)
-					s.sendMessage(str,
-						data.ID, strconv.Itoa(s.msgID))
-					s.msgID++
-				case <-time.After(time.Duration(10) * time.Minute):
-					s.sendMessage("Timed out waiting for build status from drone.",
-						data.ID, strconv.Itoa(s.msgID))
-					s.msgID++
-				}
-			}()
+			s.commitParent[payload.HeadCommit.ID] = data.ID
 		}
 	}
 }
