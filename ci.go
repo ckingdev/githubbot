@@ -34,8 +34,8 @@ func (s *Session) ciHandler() error {
 				emoji = ":no_entry:"
 			}
 			s.sendMessage(fmt.Sprintf(
-				"%s [ travis.ci | Branch: %s | %s ] %s | %s.",
-				emoji, p.Repository.Name, p.Branch, p.Message, p.StatusMessage),
+				"%s [ travis-ci.org | %s | Branch: %s ] (%s)",
+				emoji, p.Repository.Name, p.Branch, p.BuildURL),
 				parent, strconv.Itoa(s.msgID))
 			s.msgID++
 		case p := <-dServer.Out:
@@ -50,12 +50,12 @@ func (s *Session) ciHandler() error {
 			} else {
 				emoji = ":no_entry:"
 			}
-			str := fmt.Sprintf("%s [ drone.io | Branch: %s | %s ] %s | %s",
+			url := fmt.Sprintf("%s/%s", p.FromURL, p.Commit.SHA)
+			str := fmt.Sprintf("%s [ drone.io | %s | Branch: %s ] (%s)",
 				emoji,
 				p.Repository.Name,
 				p.Commit.Branch,
-				p.Commit.Message,
-				p.Commit.Status,
+				url,
 			)
 			s.sendMessage(str,
 				parent, strconv.Itoa(s.msgID))
