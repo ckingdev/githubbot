@@ -91,10 +91,11 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			if action == "synced" {
 				action = "New commits made to synced branch."
 			}
-			msg := fmt.Sprintf("[ %s | PR: %s ] %s",
+			msg := fmt.Sprintf("[ %s | PR: %s ] %s (%s)",
 				payload.Repository.Name,
 				payload.PullRequest.Title,
 				action,
+				payload.PullRequest.URL,
 			)
 			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
 			s.msgID++
@@ -129,12 +130,23 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			if !ok {
 				panic("Malformed *PushEvent.")
 			}
-			msg := fmt.Sprintf(":repeat: [ %s | Branch: %s ] Commit: %s (%s)",
-				payload.Repository.Name,
-				payload.Ref[11:], // this discards "refs/heads/"
-				payload.HeadCommit.Message,
-				payload.HeadCommit.URL,
-			)
+			var msg string
+			if len(payload.Commits) > 1 {
+				msg = fmt.Sprintf(":repeat: [ %s | Branch: %s ] %v Commits: %s (%s)",
+					payload.Repository.Name,
+					payload.Ref[11:], // this discards "refs/heads/"
+					len(payload.Commits),
+					payload.HeadCommit.Message,
+					payload.Compare,
+				)
+			} else {
+				msg = fmt.Sprintf(":repeat: [ %s | Branch: %s ] Commit: %s (%s)",
+					payload.Repository.Name,
+					payload.Ref[11:], // this discards "refs/heads/"
+					payload.HeadCommit.Message,
+					payload.HeadCommit.URL,
+				)
+			}
 			t := strconv.Itoa(int(time.Now().Unix()))
 			s.waiting = true
 			s.sendMessage(msg, "", t)
