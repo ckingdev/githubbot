@@ -91,11 +91,11 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			if action == "synced" {
 				action = "New commits made to synced branch."
 			}
-			msg := fmt.Sprintf("[ %s | PR: %s ] %s (%s)",
+			msg := fmt.Sprintf(":pencil: [ %s | PR: %s ] %s (%s)",
 				payload.Repository.Name,
 				payload.PullRequest.Title,
 				action,
-				payload.PullRequest.URL,
+				payload.PullRequest.HTMLURL,
 			)
 			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
 			s.msgID++
@@ -104,7 +104,7 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			if !ok {
 				panic("Malformed *PullRequestReviewCommentEvent.")
 			}
-			msg := fmt.Sprintf("[ %s | PR: %s ] Comment: %s: %s (%s)",
+			msg := fmt.Sprintf(":speech_balloon: [ %s | PR: %s ] Comment: %s: %s (%s)",
 				payload.Repository.Name,
 				payload.PullRequest.Title,
 				payload.Sender.Login,
