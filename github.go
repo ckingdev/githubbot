@@ -130,6 +130,9 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			if !ok {
 				panic("Malformed *PushEvent.")
 			}
+			if payload.HeadCommit.Message == "" {
+				return
+			}
 			var msg string
 			if len(payload.Commits) > 1 {
 				msg = fmt.Sprintf(":repeat: [ %s | Branch: %s ] %v Commits: %s (%s)",
