@@ -88,7 +88,7 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 				panic("Malformed *PullRequestEvent.")
 			}
 			action := payload.Action
-			if action == "synced" {
+			if action == "synchronize" {
 				action = "New commits made to synced branch."
 			}
 			msg := fmt.Sprintf(":pencil: [ %s | PR: %s ] %s (%s)",
@@ -97,8 +97,28 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 				action,
 				payload.PullRequest.HTMLURL,
 			)
-			s.sendMessage(msg, "", strconv.Itoa(s.msgID))
 			s.msgID++
+			t := strconv.Itoa(int(time.Now().Unix()))
+			s.waiting = true
+			s.sendMessage(msg, "", t)
+			var reply PacketEvent
+			for s.waiting {
+				reply = <-sendReplyChan
+				if reply.ID == t {
+					s.waiting = false
+				}
+			}
+			srPayload, err := reply.Payload()
+			if err != nil {
+				s.logger.Fatalln(err)
+			}
+
+			// need send-reply for msgID to reply to
+			data, ok := srPayload.(*SendReply)
+			if !ok {
+				s.logger.Fatalln("Could not assert *SendReply as such.")
+			}
+			s.commitParent[payload.PullRequest.Head.SHA] = data.ID
 		case gohook.PullRequestReviewCommentEventType:
 			payload, ok := et.Event.(*gohook.PullRequestReviewCommentEvent)
 			if !ok {
