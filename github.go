@@ -191,6 +191,14 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 				s.logger.Fatalln("Could not assert *SendReply as such.")
 			}
 			s.commitParent[payload.HeadCommit.ID] = data.ID
+		case gohook.PingEventType:
+			payload, ok := et.Event.(*gohook.PingEvent)
+			if !ok {
+				panic("Malformed *PingEvent")
+			}
+			s.sendMessage("[ Github Webhook | ping ]", "", strconv.Itoa(s.msgID))
+			s.msgID++
 		}
+
 	}
 }
