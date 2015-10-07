@@ -19,8 +19,6 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 		et := <-gServer.EventAndTypes
 		s.logger.Infof("Received hook event of type '%s'.", et.Type)
 		switch et.Type {
-		case gohook.PingEventType:
-			continue
 		case gohook.CommitCommentEventType:
 			payload, ok := et.Event.(*gohook.CommitCommentEvent)
 			if !ok {
@@ -192,10 +190,10 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 			}
 			s.commitParent[payload.HeadCommit.ID] = data.ID
 		case gohook.PingEventType:
-			payload, ok := et.Event.(*gohook.PingEvent)
-			if !ok {
-				panic("Malformed *PingEvent")
-			}
+			//payload, ok := et.Event.(*gohook.PingEvent)
+			//if !ok {
+			//	panic("Malformed *PingEvent")
+			//}
 			s.sendMessage("[ Github Webhook | ping ]", "", strconv.Itoa(s.msgID))
 			s.msgID++
 		}
