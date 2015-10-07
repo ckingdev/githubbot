@@ -151,7 +151,7 @@ func (s *Session) hookServer(port int, secret string, sendReplyChan chan PacketE
 				panic("Malformed *PushEvent.")
 			}
 			if payload.HeadCommit.Message == "" {
-				return
+				continue
 			}
 			var msg string
 			if len(payload.Commits) > 1 {
