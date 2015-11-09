@@ -40,27 +40,22 @@ func (s *Session) ciHandler() error {
 			s.msgID++
 		case p := <-dServer.Out:
 			var parent string
-			parent, ok := s.commitParent[p.Commit.SHA]
+			parent, ok := s.commitParent[p.Build.Ref]
 			if !ok {
 				parent = ""
 			}
 			var emoji string
-			if p.Commit.Status == "Success" {
+			if p.Build.Status == "Success" {
 				emoji = ":white_check_mark:"
 			} else {
 				emoji = ":no_entry:"
 			}
 			// https://drone.in.euphoria.io/github.com/euphoria-io/heim/master/b816f23ec209d6f6d2f99788515329099e3d92d0
-			url := fmt.Sprintf("drone.in.euphoria.io/%s/%s/%s/%s/%s",
-				p.Repository.Host,
-				p.Repository.Owner,
-				p.Repository.Name,
-				p.Commit.Branch,
-				p.Commit.SHA)
+			url := p.Build.LinkURL
 			str := fmt.Sprintf("%s [ drone.io | %s | Branch: %s ] (%s)",
 				emoji,
-				p.Repository.Name,
-				p.Commit.Branch,
+				p.Repo.Name,
+				p.Build.Branch,
 				url,
 			)
 			s.sendMessage(str,
