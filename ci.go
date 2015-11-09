@@ -51,7 +51,7 @@ func (s *Session) ciHandler() error {
 				emoji = ":no_entry:"
 			}
 			// https://drone.in.euphoria.io/euphoria-io/heim/77
-			url := fmt.Sprintf("drone.in.euphoria.io/%s/%s/%s",
+			url := fmt.Sprintf("drone.in.euphoria.io/%s/%s/%v",
 				p.Repo.Name,
 				p.Build.Branch,
 				p.Build.Number,
